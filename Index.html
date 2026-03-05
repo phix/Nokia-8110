@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nokia 8110 Matrix Auto-Slide Mod</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+–green: #00ff41;
+–dim-green: #00b32c;
+–dark-green: #003b0f;
+–black: #0a0a0a;
+–panel: #0d1a0f;
+–text: #c8f5c8;
+–accent: #39ff14;
+}
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background-color: var(–black);
+color: var(–text);
+font-family: ‘Rajdhani’, sans-serif;
+font-size: 17px;
+line-height: 1.7;
+min-height: 100vh;
+background-image:
+repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.015) 2px, rgba(0,255,65,0.015) 4px);
+}
+
+/* Rain canvas background */
+#rain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.15; pointer-events: none; }
+
+.content { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+/* Header */
+.header { text-align: center; padding: 48px 0 40px; border-bottom: 1px solid var(–dark-green); margin-bottom: 48px; }
+.header .eyebrow { font-family: ‘Share Tech Mono’, monospace; color: var(–dim-green); font-size: 13px; letter-spacing: 4px; margin-bottom: 12px; }
+.header h1 { font-family: ‘Orbitron’, monospace; font-size: clamp(26px, 5vw, 48px); font-weight: 900; color: var(–green); text-shadow: 0 0 30px rgba(0,255,65,0.5); line-height: 1.2; margin-bottom: 16px; }
+.header .sub { color: var(–dim-green); font-size: 15px; font-family: ‘Share Tech Mono’, monospace; }
+
+/* Warning box */
+.warning {
+border: 1px solid #ff6b00;
+background: rgba(255,107,0,0.07);
+padding: 16px 20px;
+border-radius: 4px;
+margin-bottom: 40px;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 13px;
+color: #ffa040;
+}
+.warning strong { color: #ff6b00; }
+
+/* Section */
+.section { margin-bottom: 56px; }
+.section-label { font-family: ‘Share Tech Mono’, monospace; font-size: 11px; color: var(–dim-green); letter-spacing: 3px; margin-bottom: 8px; }
+.section h2 { font-family: ‘Orbitron’, monospace; font-size: 22px; color: var(–green); margin-bottom: 20px; border-bottom: 1px solid var(–dark-green); padding-bottom: 10px; }
+
+p { margin-bottom: 14px; color: var(–text); }
+
+/* Steps */
+.step {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 28px;
+background: var(–panel);
+border: 1px solid var(–dark-green);
+border-left: 3px solid var(–green);
+border-radius: 4px;
+padding: 24px;
+margin-bottom: 28px;
+align-items: start;
+}
+.step.full { grid-template-columns: 1fr; }
+.step-num { font-family: ‘Orbitron’, monospace; font-size: 11px; color: var(–dim-green); letter-spacing: 2px; margin-bottom: 6px; }
+.step h3 { font-family: ‘Orbitron’, monospace; font-size: 16px; color: var(–accent); margin-bottom: 10px; }
+.step p { margin-bottom: 8px; font-size: 15px; }
+.step-diagram { display: flex; align-items: center; justify-content: center; }
+
+/* Diagrams */
+svg text { font-family: ‘Share Tech Mono’, monospace; }
+.diagram-label { font-family: ‘Share Tech Mono’, monospace; font-size: 11px; color: var(–dim-green); text-align: center; margin-top: 8px; letter-spacing: 1px; }
+
+/* Parts list */
+.parts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.part-item {
+background: rgba(0,255,65,0.04);
+border: 1px solid var(–dark-green);
+border-radius: 3px;
+padding: 10px 14px;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 13px;
+color: var(–text);
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.part-icon { color: var(–green); font-size: 16px; }
+
+/* How it works summary */
+.mechanic-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 12px; }
+.mechanic-card {
+background: var(–panel);
+border: 1px solid var(–dark-green);
+border-top: 2px solid var(–green);
+border-radius: 4px;
+padding: 16px;
+text-align: center;
+}
+.mechanic-card .icon { font-size: 28px; margin-bottom: 8px; }
+.mechanic-card h4 { font-family: ‘Orbitron’, monospace; font-size: 12px; color: var(–green); margin-bottom: 6px; }
+.mechanic-card p { font-size: 13px; color: var(–dim-green); margin: 0; }
+
+/* Footer */
+.footer { text-align: center; font-family: ‘Share Tech Mono’, monospace; font-size: 12px; color: #1a3a1a; margin-top: 60px; border-top: 1px solid #0f1f0f; padding-top: 24px; }
+
+@media (max-width: 600px) {
+.step { grid-template-columns: 1fr; }
+.parts { grid-template-columns: 1fr; }
+.mechanic-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+</head>
+<body>
+
+<canvas id="rain"></canvas>
+
+<div class="content">
+
+  <div class="header">
+    <div class="eyebrow">// DIY MOD GUIDE //</div>
+    <h1>Nokia 8110<br>Matrix Auto-Slide</h1>
+    <div class="sub">The rubber band mod — as seen on HowardForums, circa 2003</div>
+  </div>
+
+  <div class="warning">
+    <strong>⚠ WARNING:</strong> This mod involves filing down plastic parts and adding a release button hole to your phone body. Attempt only on a phone you are willing to risk. The rubber bands are not permanent — they can be removed without dismantling the phone.
+  </div>
+
+  <!-- How it works -->
+
+  <div class="section">
+    <div class="section-label">// OVERVIEW</div>
+    <h2>How It Works</h2>
+    <p>The Nokia 8110's keypad cover slides down a pair of plastic rails on either side of the phone body. The original design requires you to push it manually. This mod puts the slider under constant tension using rubber bands, and adds a locking clip so the slide stays closed — until you press the release and it snaps open automatically.</p>
+    <div class="mechanic-grid">
+      <div class="mechanic-card">
+        <div class="icon">🔴</div>
+        <h4>Tension</h4>
+        <p>Rubber bands hooked at 4 anchor points pull the slide downward at all times</p>
+      </div>
+      <div class="mechanic-card">
+        <div class="icon">🔒</div>
+        <h4>Lock</h4>
+        <p>A small spring clip catches a notch on the underside of the slide, holding it closed</p>
+      </div>
+      <div class="mechanic-card">
+        <div class="icon">⚡</div>
+        <h4>Release</h4>
+        <p>Pushing the clip inward unhooks it from the notch — the bands do the rest</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parts -->
+
+  <div class="section">
+    <div class="section-label">// WHAT YOU NEED</div>
+    <h2>Parts &amp; Tools</h2>
+    <div class="parts">
+      <div class="part-item"><span class="part-icon">⭕</span> Thin rubber bands (black recommended)</div>
+      <div class="part-item"><span class="part-icon">🔧</span> Small flat-head screwdriver</div>
+      <div class="part-item"><span class="part-icon">📎</span> Small metal spring clip (e.g. from a pen or bobby pin)</div>
+      <div class="part-item"><span class="part-icon">🔩</span> Fine metal file or sandpaper</div>
+      <div class="part-item"><span class="part-icon">✂️</span> Small drill or craft knife (for release hole)</div>
+      <div class="part-item"><span class="part-icon">💡</span> Good lighting &amp; patience</div>
+    </div>
+  </div>
+
+  <!-- Steps -->
+
+  <div class="section">
+    <div class="section-label">// STEP BY STEP</div>
+    <h2>The Mod</h2>
+
+```
+<!-- Step 1 -->
+<div class="step">
+  <div class="step-text">
+    <div class="step-num">STEP 01</div>
+    <h3>Remove &amp; Inspect the Slide</h3>
+    <p>Gently pull the keypad cover slide off the phone's rails. You'll see two long plastic tracks on either side. Look at the underside of the slide — you need to find (or file) a small notch where the locking clip will catch.</p>
+    <p>The notch must be near the top of the slide's travel — i.e. when the slide is fully closed (keypad covered), this notch lines up with where your clip will sit.</p>
+  </div>
+  <div class="step-diagram">
+    <div>
+      <svg width="200" height="220" viewBox="0 0 200 220">
+        <!-- Phone body -->
+        <rect x="50" y="10" width="100" height="200" rx="16" fill="#0d1a0f" stroke="#00ff41" stroke-width="1.5"/>
+        <!-- Screen area -->
+        <rect x="62" y="20" width="76" height="55" rx="4" fill="#001a05" stroke="#00b32c" stroke-width="1"/>
+        <text x="100" y="50" text-anchor="middle" fill="#00b32c" font-size="9">SCREEN</text>
+        <!-- Slide cover (closed) -->
+        <rect x="50" y="120" width="100" height="82" rx="0 0 16 16" fill="#143d18" stroke="#00ff41" stroke-width="1.5"/>
+        <text x="100" y="165" text-anchor="middle" fill="#00ff41" font-size="9">KEYPAD SLIDE</text>
+        <!-- Rail left -->
+        <rect x="48" y="85" width="4" height="110" rx="2" fill="#00b32c" opacity="0.5"/>
+        <!-- Rail right -->
+        <rect x="148" y="85" width="4" height="110" rx="2" fill="#00b32c" opacity="0.5"/>
+        <!-- Notch indicator -->
+        <rect x="80" y="122" width="40" height="6" rx="2" fill="#ff6b00" opacity="0.8"/>
+        <text x="100" y="148" text-anchor="middle" fill="#ffa040" font-size="8">notch here</text>
+        <line x1="100" y1="142" x2="100" y2="130" stroke="#ff6b00" stroke-width="1" stroke-dasharray="2,2"/>
+      </svg>
+      <div class="diagram-label">Slide removed — notch on underside</div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step">
+  <div class="step-text">
+    <div class="step-num">STEP 02</div>
+    <h3>File the Tracks to Reduce Friction</h3>
+    <p>The rubber bands won't be very strong, so you need to reduce the sliding friction as much as possible. Use a fine metal file or folded sandpaper to lightly smooth the inside faces of both plastic rail tracks on the phone body.</p>
+    <p>Don't overdo it — you just want to remove any roughness. Test the slide: it should glide with almost no resistance when you push it down with a single finger.</p>
+  </div>
+  <div class="step-diagram">
+    <div>
+      <svg width="200" height="220" viewBox="0 0 200 220">
+        <!-- Phone body -->
+        <rect x="50" y="10" width="100" height="200" rx="16" fill="#0d1a0f" stroke="#00ff41" stroke-width="1.5"/>
+        <!-- Left rail with filing marks -->
+        <rect x="48" y="80" width="6" height="120" rx="2" fill="#143d18" stroke="#00b32c" stroke-width="1"/>
+        <line x1="49" y1="90" x2="53" y2="94" stroke="#00ff41" stroke-width="1"/>
+        <line x1="49" y1="100" x2="53" y2="104" stroke="#00ff41" stroke-width="1"/>
+        <line x1="49" y1="110" x2="53" y2="114" stroke="#00ff41" stroke-width="1"/>
+        <line x1="49" y1="120" x2="53" y2="124" stroke="#00ff41" stroke-width="1"/>
+        <line x1="49" y1="130" x2="53" y2="134" stroke="#00ff41" stroke-width="1"/>
+        <line x1="49" y1="140" x2="53" y2="144" stroke="#00ff41" stroke-width="1"/>
+        <!-- Right rail -->
+        <rect x="146" y="80" width="6" height="120" rx="2" fill="#143d18" stroke="#00b32c" stroke-width="1"/>
+        <line x1="147" y1="90" x2="151" y2="94" stroke="#00ff41" stroke-width="1"/>
+        <line x1="147" y1="100" x2="151" y2="104" stroke="#00ff41" stroke-width="1"/>
+        <line x1="147" y1="110" x2="151" y2="114" stroke="#00ff41" stroke-width="1"/>
+        <line x1="147" y1="120" x2="151" y2="124" stroke="#00ff41" stroke-width="1"/>
+        <line x1="147" y1="130" x2="151" y2="134" stroke="#00ff41" stroke-width="1"/>
+        <line x1="147" y1="140" x2="151" y2="144" stroke="#00ff41" stroke-width="1"/>
+        <!-- File tool -->
+        <rect x="30" y="105" width="22" height="6" rx="1" fill="#888" stroke="#aaa" stroke-width="1"/>
+        <line x1="30" y1="108" x2="52" y2="108" stroke="#555" stroke-width="1"/>
+        <text x="100" y="190" text-anchor="middle" fill="#00b32c" font-size="9">Smooth both rails</text>
+        <text x="100" y="203" text-anchor="middle" fill="#00b32c" font-size="9">with fine file</text>
+        <!-- Arrow showing file direction -->
+        <line x1="52" y1="108" x2="47" y2="108" stroke="#00ff41" stroke-width="1.5" marker-end="url(#arr)"/>
+        <defs>
+          <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#00ff41"/>
+          </marker>
+        </defs>
+      </svg>
+      <div class="diagram-label">File the inner rail faces</div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step">
+  <div class="step-text">
+    <div class="step-num">STEP 03</div>
+    <h3>Hook the Rubber Bands at 4 Points</h3>
+    <p>This is the core of the mod. A single rubber band is hooked around <strong>4 anchor points</strong> creating a figure-of-eight of tension:</p>
+    <p><strong>Points 1 &amp; 2 (TOP):</strong> Hook each end of the band around the top corners of the keypad slide itself — where the slide body has a small lip or groove.</p>
+    <p><strong>Points 3 &amp; 4 (BOTTOM):</strong> The band loops down and hooks around the bottom of the phone body — there are usually small raised tabs or slots near the base you can hook into.</p>
+    <p>You do <em>not</em> need to cut or tie the band. Just hook it. This also makes replacement easy.</p>
+  </div>
+  <div class="step-diagram">
+    <div>
+      <svg width="200" height="240" viewBox="0 0 200 240">
+        <defs>
+          <marker id="arr2" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto">
+            <path d="M0,0 L5,2.5 L0,5 Z" fill="#ff6b00"/>
+          </marker>
+        </defs>
+        <!-- Phone outline -->
+        <rect x="55" y="10" width="90" height="220" rx="14" fill="#0d1a0f" stroke="#00ff41" stroke-width="1.5"/>
+        <!-- Slide (closed, top position) -->
+        <rect x="55" y="10" width="90" height="90" rx="14 14 0 0" fill="#143d18" stroke="#00b32c" stroke-width="1"/>
+        <text x="100" y="58" text-anchor="middle" fill="#00b32c" font-size="9">SLIDE</text>
+        <text x="100" y="70" text-anchor="middle" fill="#00b32c" font-size="9">(closed)</text>
+
+        <!-- Anchor points - top of slide -->
+        <circle cx="65" cy="98" r="5" fill="#ff6b00" stroke="#ffa040" stroke-width="1"/>
+        <circle cx="135" cy="98" r="5" fill="#ff6b00" stroke="#ffa040" stroke-width="1"/>
+        <text x="40" y="101" text-anchor="middle" fill="#ffa040" font-size="8">P1</text>
+        <text x="160" y="101" text-anchor="middle" fill="#ffa040" font-size="8">P2</text>
+
+        <!-- Anchor points - bottom of phone -->
+        <circle cx="68" cy="220" r="5" fill="#ff6b00" stroke="#ffa040" stroke-width="1"/>
+        <circle cx="132" cy="220" r="5" fill="#ff6b00" stroke="#ffa040" stroke-width="1"/>
+        <text x="40" y="223" text-anchor="middle" fill="#ffa040" font-size="8">P3</text>
+        <text x="162" y="223" text-anchor="middle" fill="#ffa040" font-size="8">P4</text>
+
+        <!-- Rubber band paths -->
+        <!-- Left band: P1 to P3 -->
+        <path d="M65,103 C60,140 63,180 68,215" stroke="#ffdd00" stroke-width="2.5" fill="none" stroke-dasharray="4,2" opacity="0.9"/>
+        <!-- Right band: P2 to P4 -->
+        <path d="M135,103 C140,140 137,180 132,215" stroke="#ffdd00" stroke-width="2.5" fill="none" stroke-dasharray="4,2" opacity="0.9"/>
+
+        <!-- Tension arrows -->
+        <line x1="100" y1="130" x2="100" y2="155" stroke="#00ff41" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <text x="100" y="145" text-anchor="middle" fill="#00ff41" font-size="8">tension</text>
+        <text x="100" y="155" text-anchor="middle" fill="#00ff41" font-size="8">↓</text>
+      </svg>
+      <div class="diagram-label">Band hooked at 4 points — pulls slide DOWN</div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step">
+  <div class="step-text">
+    <div class="step-num">STEP 04</div>
+    <h3>Add the Locking Clip</h3>
+    <p>Without a lock, the slide will just fall open immediately. You need a small, springy metal clip — a straightened and re-bent hairpin, a small piece of spring steel from a pen click-mechanism, or similar.</p>
+    <p>The clip is positioned inside the phone body so that when the slide is pushed fully closed (upward), the clip's tip springs into the notch on the underside of the slide and holds it shut.</p>
+    <p>Bend the clip into an L-shape or hook shape. One end stays anchored; the other end presses outward by spring tension to catch the notch.</p>
+  </div>
+  <div class="step-diagram">
+    <div>
+      <svg width="200" height="220" viewBox="0 0 200 220">
+        <!-- Cross-section view label -->
+        <text x="100" y="14" text-anchor="middle" fill="#00b32c" font-size="9">SIDE CROSS-SECTION VIEW</text>
+        <!-- Phone body side -->
+        <rect x="40" y="20" width="120" height="180" rx="8" fill="#0d1a0f" stroke="#00ff41" stroke-width="1.5"/>
+        <!-- Slide underside -->
+        <rect x="40" y="20" width="120" height="55" rx="8 8 0 0" fill="#143d18" stroke="#00b32c" stroke-width="1"/>
+        <text x="100" y="48" text-anchor="middle" fill="#00b32c" font-size="8">UNDERSIDE OF SLIDE</text>
+        <!-- Notch -->
+        <rect x="85" y="73" width="30" height="8" rx="2" fill="#ff6b00" opacity="0.9"/>
+        <text x="100" y="70" text-anchor="middle" fill="#ffa040" font-size="8">NOTCH</text>
+        <!-- Spring clip -->
+        <path d="M75,120 L75,90 Q75,82 83,82 L85,82" stroke="#aaffaa" stroke-width="2.5" fill="none"/>
+        <circle cx="85" cy="82" r="3" fill="#aaffaa"/>
+        <!-- Anchor of clip -->
+        <rect x="60" y="118" width="20" height="6" rx="2" fill="#888" stroke="#aaa" stroke-width="1"/>
+        <text x="70" y="140" text-anchor="middle" fill="#888888" font-size="8">clip anchor</text>
+        <!-- Arrow showing clip tension -->
+        <line x1="80" y1="82" x2="80" y2="75" stroke="#00ff41" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="60" y="108" text-anchor="middle" fill="#aaffaa" font-size="8">spring</text>
+        <text x="60" y="118" text-anchor="middle" fill="#aaffaa" font-size="8">clip</text>
+        <!-- Lock symbol -->
+        <text x="145" y="85" text-anchor="middle" fill="#ff6b00" font-size="18">🔒</text>
+        <text x="145" y="100" text-anchor="middle" fill="#ffa040" font-size="8">LOCKED</text>
+      </svg>
+      <div class="diagram-label">Clip tip catches notch to hold slide shut</div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="step">
+  <div class="step-text">
+    <div class="step-num">STEP 05</div>
+    <h3>Add the Release Button</h3>
+    <p>This is the most involved part. You need a way to push the clip inward to release the notch from the outside of the phone. The original modder added a small push-button on the side or bottom of the phone.</p>
+    <p>Carefully use a small drill bit or craft knife to create a tiny hole in the phone casing, positioned so a thin tool (or your fingernail) can press the spring clip inward through the hole.</p>
+    <p>Some people use a small piece of plastic or a tiny button as a cosmetic release that pokes through this hole.</p>
+  </div>
+  <div class="step-diagram">
+    <div>
+      <svg width="200" height="220" viewBox="0 0 200 220">
+        <defs>
+          <marker id="arr3" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#00ff41"/>
+          </marker>
+        </defs>
+        <!-- Phone body -->
+        <rect x="50" y="20" width="100" height="180" rx="14" fill="#0d1a0f" stroke="#00ff41" stroke-width="1.5"/>
+        <!-- Release hole on side -->
+        <circle cx="50" cy="100" r="6" fill="#000" stroke="#00ff41" stroke-width="1.5"/>
+        <text x="28" y="103" text-anchor="middle" fill="#00ff41" font-size="8">HOLE</text>
+        <!-- Finger/tool pressing -->
+        <line x1="20" y1="100" x2="43" y2="100" stroke="#00ff41" stroke-width="2" marker-end="url(#arr3)"/>
+        <text x="16" y="92" text-anchor="middle" fill="#00b32c" font-size="8">press</text>
+        <!-- Internal clip representation -->
+        <line x1="56" y1="100" x2="90" y2="100" stroke="#aaffaa" stroke-width="2" stroke-dasharray="3,2"/>
+        <circle cx="90" cy="100" r="4" fill="#aaffaa"/>
+        <text x="100" y="125" text-anchor="middle" fill="#aaffaa" font-size="9">clip pushed</text>
+        <text x="100" y="137" text-anchor="middle" fill="#aaffaa" font-size="9">inward → releases</text>
+        <text x="100" y="149" text-anchor="middle" fill="#aaffaa" font-size="9">notch → SNAP! ↓</text>
+        <!-- Slide flying down -->
+        <rect x="70" y="155" width="60" height="35" rx="4" fill="#143d18" stroke="#00b32c" stroke-width="1" opacity="0.5"/>
+        <text x="100" y="176" text-anchor="middle" fill="#00b32c" font-size="8">slide snaps</text>
+        <text x="100" y="187" text-anchor="middle" fill="#00b32c" font-size="8">open ↓</text>
+      </svg>
+      <div class="diagram-label">Press hole → clip releases → bands pull slide open</div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 6 -->
+<div class="step full">
+  <div class="step-text">
+    <div class="step-num">STEP 06</div>
+    <h3>Test &amp; Tune</h3>
+    <p>Reassemble the slide onto the rails. Push it closed — you should feel the clip click into the notch. Then press the release hole. The slide should snap downward with satisfying speed.</p>
+    <p>If it's sluggish: file the rails a little more, or try tighter rubber bands. If it slams too hard: use thinner or fewer bands. If the clip doesn't catch reliably, adjust the bend angle of the clip so it has more spring tension outward.</p>
+    <p>Replace yellow or visible bands with black ones once you're happy with the mechanism — they'll be invisible and look much more factory.</p>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- Final overview diagram -->
+
+  <div class="section">
+    <div class="section-label">// COMPLETE OVERVIEW</div>
+    <h2>Full Mechanism at a Glance</h2>
+    <div style="display:flex; justify-content:center; padding: 12px 0;">
+      <div>
+        <svg width="320" height="300" viewBox="0 0 320 300">
+          <defs>
+            <marker id="garr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#00ff41"/>
+            </marker>
+          </defs>
+          <!-- Phone body -->
+          <rect x="90" y="10" width="140" height="280" rx="18" fill="#0d1a0f" stroke="#00ff41" stroke-width="1.5"/>
+
+```
+      <!-- Slide (closed) -->
+      <rect x="90" y="10" width="140" height="110" rx="18 18 0 0" fill="#143d18" stroke="#00b32c" stroke-width="1.5"/>
+      <text x="160" y="65" text-anchor="middle" fill="#00b32c" font-size="10">KEYPAD SLIDE</text>
+      <text x="160" y="80" text-anchor="middle" fill="#00b32c" font-size="9">(closed / held by clip)</text>
+
+      <!-- Anchor points on slide top -->
+      <circle cx="105" cy="118" r="6" fill="#ffdd00" stroke="#ffd700" stroke-width="1.5"/>
+      <circle cx="215" cy="118" r="6" fill="#ffdd00" stroke="#ffd700" stroke-width="1.5"/>
+
+      <!-- Anchor points at bottom -->
+      <circle cx="108" cy="278" r="6" fill="#ffdd00" stroke="#ffd700" stroke-width="1.5"/>
+      <circle cx="212" cy="278" r="6" fill="#ffdd00" stroke="#ffd700" stroke-width="1.5"/>
+
+      <!-- Rubber bands -->
+      <path d="M105,124 C98,180 100,235 108,272" stroke="#ffdd00" stroke-width="3" fill="none" opacity="0.85"/>
+      <path d="M215,124 C222,180 220,235 212,272" stroke="#ffdd00" stroke-width="3" fill="none" opacity="0.85"/>
+
+      <!-- Labels for bands -->
+      <text x="75" y="200" text-anchor="middle" fill="#ffd700" font-size="9">rubber</text>
+      <text x="75" y="211" text-anchor="middle" fill="#ffd700" font-size="9">band</text>
+
+      <!-- Spring clip -->
+      <path d="M130,170 L130,125 Q130,118 137,118 L140,118" stroke="#aaffaa" stroke-width="2.5" fill="none"/>
+      <circle cx="140" cy="118" r="4" fill="#aaffaa"/>
+
+      <!-- Notch on underside of slide -->
+      <rect x="128" y="108" width="24" height="7" rx="2" fill="#ff6b00" opacity="0.9"/>
+      <text x="160" y="107" text-anchor="start" fill="#ffa040" font-size="8">← notch</text>
+
+      <!-- Release hole -->
+      <circle cx="90" cy="155" r="7" fill="#000" stroke="#00ff41" stroke-width="1.5"/>
+      <text x="70" y="145" text-anchor="middle" fill="#00ff41" font-size="8">release</text>
+      <text x="70" y="155" text-anchor="middle" fill="#00ff41" font-size="8">hole</text>
+
+      <!-- Tension arrows -->
+      <text x="160" y="210" text-anchor="middle" fill="#00ff41" font-size="10">↓ TENSION ↓</text>
+      <text x="160" y="225" text-anchor="middle" fill="#00b32c" font-size="9">bands pull slide down</text>
+      <text x="160" y="238" text-anchor="middle" fill="#00b32c" font-size="9">clip holds it closed</text>
+      <text x="160" y="251" text-anchor="middle" fill="#00b32c" font-size="9">press hole → SNAP!</text>
+    </svg>
+    <div class="diagram-label" style="text-align:center; margin-top:10px;">Complete view: bands (yellow), notch (orange), clip (green), release (circle)</div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <div class="footer">
+    <p>Based on the original mod by greensheepuk03 — HowardForums, 2003</p>
+    <p style="margin-top:6px;">// THE MATRIX HAS YOU //</p>
+  </div>
+
+</div>
+
+<script>
+// Matrix rain
+const canvas = document.getElementById('rain');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+const cols = Math.floor(canvas.width / 18);
+const drops = Array(cols).fill(1);
+function drawRain() {
+  ctx.fillStyle = 'rgba(0,0,0,0.05)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#00ff41';
+  ctx.font = '14px Share Tech Mono, monospace';
+  drops.forEach((y, i) => {
+    const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+    ctx.fillText(char, i * 18, y * 18);
+    if (y * 18 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  });
+}
+setInterval(drawRain, 60);
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
